@@ -2,64 +2,98 @@
 // Moving from room to room
 // Most rooms are empty, except: 1) cavern entrance 2) fountain room with the fountain.
 // go to fountain, activate and go back, then you win. 
+FountainOfObjectsGame game = new FountainOfObjectsGame();
+game.Run();
 
-Map map = new Map();
-Renderer renderer = new Renderer();
-Player player = new Player();
-
-renderer.Render(map);
-Console.WriteLine($"({player.CurrentLocation.Row}, {player.CurrentLocation.Column})");
-while (true)
+public class FountainOfObjectsGame
 {
-    string? input = Console.ReadLine();
-    switch (input)
+    public void Run()
     {
-        case "n":
-            map.Set(new Coordinate(player.CurrentLocation.Row, player.CurrentLocation.Column), RoomState.Empty);
-            player.CurrentLocation.Row = player.CurrentLocation.Row - 1;
-            map.Set(new Coordinate(player.CurrentLocation.Row, player.CurrentLocation.Column), RoomState.Player);
-            break;
-        case "s":
-            map.Set(new Coordinate(player.CurrentLocation.Row, player.CurrentLocation.Column), RoomState.Empty);
-            player.CurrentLocation.Row = player.CurrentLocation.Row + 1;
-            map.Set(new Coordinate(player.CurrentLocation.Row, player.CurrentLocation.Column), RoomState.Player);
-            break;
-        case "w":
-            map.Set(new Coordinate(player.CurrentLocation.Row, player.CurrentLocation.Column), RoomState.Empty);
-            player.CurrentLocation.Column = player.CurrentLocation.Column - 1;
-            map.Set(new Coordinate(player.CurrentLocation.Row, player.CurrentLocation.Column), RoomState.Player);
-            break;
-        case "e":
-            map.Set(new Coordinate(player.CurrentLocation.Row, player.CurrentLocation.Column), RoomState.Empty);
-            player.CurrentLocation.Column = player.CurrentLocation.Column + 1;
-            map.Set(new Coordinate(player.CurrentLocation.Row, player.CurrentLocation.Column), RoomState.Player);
-            break;
-    };
 
-    renderer.Render(map);
-    Console.WriteLine(map.Get(player.CurrentLocation));
-    Console.WriteLine($"({player.CurrentLocation.Row}, {player.CurrentLocation.Column})");
-    if (player.CurrentLocation.Row == 0 && player.CurrentLocation.Column == 0)
-    {
-        Console.Write("You see light in this room coming from outside the cavern. This is the entrance.");
+        Map map = new Map();
+        Renderer renderer = new Renderer();
+        Player player = new Player();
+        Fountain fountain = new();
+        while (true)
+        {
+            renderer.Render(map);
+            Console.WriteLine($"You are in the room at ({player.CurrentLocation.Row}, {player.CurrentLocation.Column})");
+
+            if (player.CurrentLocation.Row == 0 && player.CurrentLocation.Column == 0 && fountain.IsOn)
+            {
+                Console.WriteLine("You won!");
+                break;
+            }
+            else if (player.CurrentLocation.Row == 0 && player.CurrentLocation.Column == 0)
+            {
+                Console.WriteLine("You see light in this room coming from outside the cavern. This is the entrance.");
+            }
+            else if ((player.CurrentLocation.Row == 0 && player.CurrentLocation.Column == 2) && (!fountain.IsOn))
+            {
+                Console.WriteLine("You hear water dripping in this room. The Fountain of Objects is here!");
+            }
+            else if ((player.CurrentLocation.Row == 0 && player.CurrentLocation.Column == 2) && (fountain.IsOn))
+            {
+                Console.WriteLine("You hear the rushing waters from the Fountain of Objects. It has been reactivated!");
+            }
+
+            Console.Write("What do you want to do? ");
+            string? input = Console.ReadLine();
+            switch (input)
+            {
+                case "n":
+                    map.Set(new Coordinate(player.CurrentLocation.Row, player.CurrentLocation.Column), RoomState.Empty);
+                    player.CurrentLocation.Row = player.CurrentLocation.Row - 1;
+                    map.Set(new Coordinate(player.CurrentLocation.Row, player.CurrentLocation.Column), RoomState.Player);
+                    break;
+                case "s":
+                    map.Set(new Coordinate(player.CurrentLocation.Row, player.CurrentLocation.Column), RoomState.Empty);
+                    player.CurrentLocation.Row = player.CurrentLocation.Row + 1;
+                    map.Set(new Coordinate(player.CurrentLocation.Row, player.CurrentLocation.Column), RoomState.Player);
+                    break;
+                case "w":
+                    map.Set(new Coordinate(player.CurrentLocation.Row, player.CurrentLocation.Column), RoomState.Empty);
+                    player.CurrentLocation.Column = player.CurrentLocation.Column - 1;
+                    map.Set(new Coordinate(player.CurrentLocation.Row, player.CurrentLocation.Column), RoomState.Player);
+                    break;
+                case "e":
+                    map.Set(new Coordinate(player.CurrentLocation.Row, player.CurrentLocation.Column), RoomState.Empty);
+                    player.CurrentLocation.Column = player.CurrentLocation.Column + 1;
+                    map.Set(new Coordinate(player.CurrentLocation.Row, player.CurrentLocation.Column), RoomState.Player);
+                    break;
+                case "on":
+                    fountain.IsOn = true;
+                    break;
+                case "off":
+                    fountain.IsOn = false;
+                    break;
+
+            };
+
+            renderer.Render(map);
+            Console.WriteLine($"({player.CurrentLocation.Row}, {player.CurrentLocation.Column})");
+        }
     }
-
 }
-
-public class Player
+//public interface IMove
+//{
+//    void Run
+//}
+public class GameObject
 {
     public Coordinate CurrentLocation { get; set; }
-
+}
+public class Player : GameObject
+{
     public Player()
     {
         CurrentLocation = new Coordinate(0, 0);
     }
 
 }
-
-public class Fountain
+public class Fountain : GameObject
 {
-    public Coordinate CurrentLocation { get; set; }
+    public bool IsOn { get; set; }
 
     public Fountain()
     {
